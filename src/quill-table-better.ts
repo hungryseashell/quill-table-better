@@ -124,6 +124,26 @@ class Table extends Module {
     quill.root.addEventListener('scroll', this.handleScroll.bind(this));
     this.listenDeleteTable();
     this.registerToolbarTable(options?.toolbarTable);
+    this.addGlobalEventListener(document, 'mousedown', this.handleGlobalMousedown.bind(this));
+  }
+
+  /**
+   * Global mousedown handler for cleanup
+   */
+  private handleGlobalMousedown(e: MouseEvent) {
+    const target = e.target as Element;
+    
+    // 1. Check if the click was inside the editor root
+    const isInsideEditor = this.quill.root.contains(target);
+    
+    // 2. Check if the click was inside any table UI (menus, context bars, etc.)
+    // We don't want to hide tools if the user is clicking the "Insert Row" button
+    const isInsideTableUI = this.tableMenus?.root?.contains(target) || 
+                            this.tableSelect?.root?.contains(target);
+
+    if (!isInsideEditor && !isInsideTableUI) {
+      this.hideTools();
+    }
   }
 
   /**
